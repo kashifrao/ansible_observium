@@ -1,0 +1,74 @@
+#
+#  == Copyright (c) SM Data Cloud
+#     All Rights Reserved
+#
+# Email: smcloud.operations@gmail.com
+# --------------------------------------------------------------------------
+# WARNING: This file belongs to the Core framework. Avoid any local changes
+# --------------------------------------------------------------------------
+#
+# This file is Managed by ANSIBLE
+# --------------------------------------------------------------------------
+
+    - name: Creates Observium directory
+      ansible.builtin.file:
+        path: /opt/observium
+        state: directory
+        owner: ansible-c
+        group: ans-admin
+        mode: 0775
+      become_user: root
+
+    - name: "Copy Observium tar file from storage "
+      shell: if [ ! -f /opt/observium/poller.php ]; then sudo cp -r /srv/shared-mgmt/external-softwares/observium-community-latest.tar.gz /opt/ ; else echo "" ; fi
+      become_user: root
+
+    - name: chown tar file
+      shell: sudo chmod -R 755 /opt/observium-community-latest.tar.gz
+      become_user: root
+
+    - name: chown tar file
+      shell: sudo chown -R ansible-c:ans-admin /opt/observium-community-latest.tar.gz
+      become_user: root
+
+    - name: Move to the /opt folder
+      shell: cd /opt
+      become_user: root
+
+    - name: Untar Observium
+      shell: if [ ! -f /opt/observium/poller.php ]; then sudo tar zxvf /opt/observium-community-latest.tar.gz -C /opt/  ; else echo "" ; fi
+      become_user: root
+
+    - name: Transfer observium conf file
+      copy:
+        src: "{{ansible_roles_path}}/files/observium/config.php"
+        dest: /opt/observium/
+        mode: 0755
+      become_user: root
+
+    - name: Transfer observium web conf file
+      copy:
+        src: "{{ansible_roles_path}}/files/observium/observium.conf"
+        dest: /etc/httpd/conf.d/
+        mode: 0755
+      become_user: root
+
+    - name: Creates Observium logs directory
+      ansible.builtin.file:
+        path: /opt/observium/logs
+        state: directory
+        owner: apache
+        group: apache
+        mode: 0775
+      become_user: root
+
+    - name: Creates Observium rrd directory
+      ansible.builtin.file:
+        path: /opt/observium/rrd
+        state: directory
+        owner: apache
+        group: apache
+        mode: 0775
+      become_user: root
+
+      
